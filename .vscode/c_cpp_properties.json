@@ -1,0 +1,23 @@
+{
+  "configurations": [
+    {
+      "name": "Win32",
+      "includePath": [
+        "${workspaceFolder}/glut/include",
+        "C:/Program Files/CodeBlocks/MinGW/include",
+        "C:/Program Files/CodeBlocks/MinGW/lib/gcc/mingw32/*/include"
+      ],
+      "defines": [
+        "FREEGLUT_STATIC",
+        "_WIN32",
+        "WIN32",
+        "_USE_MATH_DEFINES"
+      ],
+      "compilerPath": "C:/Program Files/CodeBlocks/MinGW/bin/g++.exe",
+      "cStandard": "c17",
+      "cppStandard": "c++17",
+      "intelliSenseMode": "windows-gcc-x86"
+    }
+  ],
+  "version": 4
+}

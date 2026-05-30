@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Compilar y ejecutar OpenGL",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "C:\\Program Files\\CodeBlocks\\MinGW\\bin;${env:PATH}"
+        }
+      ],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "C:/Program Files/CodeBlocks/MinGW/bin/gdb.exe",
+      "preLaunchTask": "build-opengl"
+    }
+  ]
+}
