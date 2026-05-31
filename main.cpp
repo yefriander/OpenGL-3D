@@ -11,11 +11,15 @@
 #include "mouse.h"
 #include "objetos.h"
 #include "escena.h"
+#include "texturas.h"
 
 using namespace std;
 
 /// Colores
 float amarillo[]={1,1,0}, blanco[]={1,1,1}, azul[]={0,0,1}, rojo[]={1,0,0}, anaranjado[]={1,0.8,0}, verde[]={0,1,0};
+
+/// IDs de texturas (se cargan en main() después de crear la ventana)
+GLuint tex_madera, tex_pared, tex_piso;
 
 void inicio ()
 {
@@ -149,7 +153,26 @@ void display(void)
     glLightfv(GL_LIGHT1, GL_POSITION, posicion_luz1);
 
     dibujar_ejes();
-    dibujar_escena();
+    // dibujar_escena();
+
+    // --- Demo de texturas ---
+    // Cubo con textura de madera en el centro
+    glPushMatrix();
+        glTranslatef(0, 0.5f, 0);
+        dibujar_cubo_texturizado(tex_madera);
+    glPopMatrix();
+
+    // Pared con textura de ladrillo detrás
+    glPushMatrix();
+        glTranslatef(0, -1.0f, -3.0f);
+        dibujar_pared_texturizada(tex_pared, 8.0f, 4.0f, 3.0f);
+    glPopMatrix();
+
+    // Piso con textura de piso
+    glPushMatrix();
+        glTranslatef(0, -1.0f, 0);
+        dibujar_piso_texturizado(tex_piso, 10.0f, 10.0f, 5.0f);
+    glPopMatrix();
 
     glutSwapBuffers();
 }
@@ -169,6 +192,12 @@ int main(int argc, char *argv[])
     glutMotionFunc(mouse_movimiento);
 
     inicio();
+
+    // Las texturas deben cargarse DESPUÉS de crear la ventana OpenGL
+    tex_madera = cargar_textura("madera.bmp");
+    tex_pared  = cargar_textura("pared.bmp");
+    tex_piso   = cargar_textura("piso.bmp");
+
     glutMainLoop();
 
     return EXIT_SUCCESS;
