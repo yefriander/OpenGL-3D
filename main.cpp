@@ -10,6 +10,7 @@
 #include "funciones.h"
 #include "mouse.h"
 #include "objetos.h"
+#include "escena.h"
 
 using namespace std;
 
@@ -27,21 +28,27 @@ void inicio ()
     gluPerspective(45, 600/600, 0.1, 100);
 
     /// Activar el sistema de iluminación
-    glEnable(GL_LIGHTING);   // sin esto glColor3f sigue funcionando pero no hay luces
-    glEnable(GL_LIGHT0);     // activar la fuente de luz 0 (OpenGL soporta hasta 8: LIGHT0..LIGHT7)
-    glEnable(GL_NORMALIZE);  // normalizar automáticamente los vectores normales (importante con glScale)
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHT1);
+    glEnable(GL_NORMALIZE);
 
-    /// --- Propiedades de la fuente de luz LIGHT0 ---
-    // Componente AMBIENTAL de la luz: intensidad de la luz de fondo
-    GLfloat luz_ambiente[] = {0.3f, 0.3f, 0.3f, 1.0f};
-    glLightfv(GL_LIGHT0, GL_AMBIENT,  luz_ambiente);
-    // Componente DIFUSA de la luz: intensidad de la luz direccional
-    GLfloat luz_difuso[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    glLightfv(GL_LIGHT0, GL_DIFFUSE,  luz_difuso);
-    // Componente ESPECULAR de la luz: intensidad del reflejo
-    GLfloat luz_especular[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular);
-    // Nota: la POSICIÓN de la luz se fija en display() después de gluLookAt
+    /// LIGHT0 — luz ambiente general (blanca, desde arriba)
+    GLfloat luz0_ambiente[]  = {0.2f, 0.2f, 0.2f, 1.0f};
+    GLfloat luz0_difuso[]    = {0.8f, 0.8f, 0.8f, 1.0f};
+    GLfloat luz0_especular[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    glLightfv(GL_LIGHT0, GL_AMBIENT,  luz0_ambiente);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE,  luz0_difuso);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, luz0_especular);
+
+    /// LIGHT1 — lámpara colgante (amarilla cálida, posicional)
+    GLfloat luz1_ambiente[]  = {0.05f, 0.04f, 0.0f,  1.0f};
+    GLfloat luz1_difuso[]    = {0.9f,  0.75f, 0.35f, 1.0f};
+    GLfloat luz1_especular[] = {0.8f,  0.65f, 0.3f,  1.0f};
+    glLightfv(GL_LIGHT1, GL_AMBIENT,  luz1_ambiente);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE,  luz1_difuso);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, luz1_especular);
+    // Nota: posición de ambas luces se fija en display() después de gluLookAt
 }
 
 /// PASO 4: Dibujar en 3D usando glVertex3f(x, y, z)
@@ -135,19 +142,14 @@ void display(void)
 
     /// Posición de la luz en coordenadas del mundo (se fija aquí, después de gluLookAt)
     /// El cuarto valor (1.0) indica luz puntual; con 0.0 sería luz direccional (infinita)
-    GLfloat posicion_luz[] = {4.0f, 6.0f, 4.0f, 1.0f};
-    glLightfv(GL_LIGHT0, GL_POSITION, posicion_luz);
+    GLfloat posicion_luz0[] = {4.0f, 6.0f, 4.0f, 1.0f};
+    glLightfv(GL_LIGHT0, GL_POSITION, posicion_luz0);
+
+    GLfloat posicion_luz1[] = {0.0f, 3.0f, 0.0f, 1.0f};  // dentro de la lámpara
+    glLightfv(GL_LIGHT1, GL_POSITION, posicion_luz1);
 
     dibujar_ejes();
-
-    /// Los 3 objetos demuestran cada componente de iluminación
-    dibujar_ambiental();    // izquierda:  solo ambiental  (plano, sin volumen)
-    dibujar_difusa();       // centro:     ambiental+difusa (con volumen, sin brillo)
-    dibujar_especular();    // derecha:    los 3 componentes (volumen + reflejo brillante)
-
-    // dibujar_cubo();  /// PASO 4: objeto dibujado en 3D
-
-    // saludar();
+    dibujar_escena();
 
     glutSwapBuffers();
 }
@@ -163,8 +165,8 @@ int main(int argc, char *argv[])
     glutDisplayFunc(display);
 
     /// PASO 6d: registrar los callbacks del mouse en GLUT
-    glutMouseFunc(mouse_boton);        // click / soltar
-    glutMotionFunc(mouse_movimiento);  // arrastrar con botón presionado
+    glutMouseFunc(mouse_boton);
+    glutMotionFunc(mouse_movimiento);
 
     inicio();
     glutMainLoop();

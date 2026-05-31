@@ -9,6 +9,7 @@
         "main.cpp",
         "mouse.cpp",
         "objetos.cpp",
+        "escena.cpp",
         "-Iglut/include",
         "-Lglut/lib",
         "-DFREEGLUT_STATIC",

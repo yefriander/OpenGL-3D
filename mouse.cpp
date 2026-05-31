@@ -23,6 +23,21 @@ void mouse_boton(int boton, int estado, int x, int y)
         mouse_x_ant = x;
         mouse_y_ant = y;
     }
+    // Scroll wheel fallback (GLUT clásico: botón 3=arriba, 4=abajo)
+    if (boton == 3 || boton == 4) {
+        radio += (boton == 3) ? -0.5f : 0.5f;
+        if (radio < 2.0f)  radio = 2.0f;
+        if (radio > 30.0f) radio = 30.0f;
+        glutPostRedisplay();
+    }
+}
+
+void mouse_scroll(int wheel, int direccion, int x, int y)
+{
+    radio -= direccion * 0.5f;
+    if (radio < 2.0f)  radio = 2.0f;
+    if (radio > 30.0f) radio = 30.0f;
+    glutPostRedisplay();
 }
 
 void mouse_movimiento(int x, int y)
