@@ -8,22 +8,13 @@
 #include <stdlib.h>
 #include <math.h> // Necesario para cos() y sin()
 #include "funciones.h"
+#include "mouse.h"
+#include "objetos.h"
 
 using namespace std;
 
 /// Colores
 float amarillo[]={1,1,0}, blanco[]={1,1,1}, azul[]={0,0,1}, rojo[]={1,0,0}, anaranjado[]={1,0.8,0}, verde[]={0,1,0};
-
-/// Variables globales de la cámara
-float radio  = 12.0;                // distancia de la cámara al origen
-float yaw    = 45 * M_PI / 180.0f;   // ángulo horizontal inicial
-float pitch  = 30 * M_PI / 180.0f;   // ángulo vertical inicial
-
-/// Variables de estado del mouse
-bool mouse_presionado = false;
-float mouse_x_ant = 0;
-float mouse_y_ant = 0;
-float sensibilidad = 0.005;  // cuánto gira por pixel arrastrado
 
 void inicio ()
 {
@@ -51,39 +42,6 @@ void inicio ()
     GLfloat luz_especular[] = {1.0f, 1.0f, 1.0f, 1.0f};
     glLightfv(GL_LIGHT0, GL_SPECULAR, luz_especular);
     // Nota: la POSICIÓN de la luz se fija en display() después de gluLookAt
-}
-
-/// PASO 6a: Callback de botón del mouse
-void mouse_boton(int boton, int estado, int x, int y){
-    if (boton == GLUT_LEFT_BUTTON){
-        mouse_presionado = (estado == GLUT_DOWN);
-        mouse_x_ant = x;
-        mouse_y_ant = y;
-    }
-}
-
-/// PASO 6b: Callback de movimiento del mouse (con botón presionado)
-void mouse_movimiento(int x, int y)
-{
-    if (!mouse_presionado)
-        return;
-
-    int delta_x = x - mouse_x_ant; // movimiento horizontal del mouse
-    int delta_y = y - mouse_y_ant; // movimiento vertical del mouse
-
-    yaw   += delta_x * sensibilidad; // girar cámara izq/der
-    pitch -= delta_y * sensibilidad; // girar cámara arriba/abajo
-
-    // Limitar pitch para que la cámara no gire más de ±89°
-    float limite = 89.0f * M_PI / 180.0f;
-
-    if (pitch > limite)  pitch = limite;
-    if (pitch < -limite) pitch = -limite;
-
-    mouse_x_ant = x;
-    mouse_y_ant = y;
-
-    glutPostRedisplay(); // solicitar que se redibuje el frame
 }
 
 /// PASO 4: Dibujar en 3D usando glVertex3f(x, y, z)
@@ -155,74 +113,6 @@ void dibujar_ejes(){
     glVertex3f(0, 0,  5);
     glEnd();
     glEnable(GL_LIGHTING);  // volver a activar para los objetos
-}
-
-/**
-OBJETO 1 — Solo componente AMBIENTAL
-El objeto se ve completamente plano y opaco.
-No importa desde dónde venga la luz ni el ángulo de visión:
-todos los píxeles tienen el mismo color. Sin volumen.
-**/
-void dibujar_ambiental(){
-    GLfloat mat_ambient[]  = {0.6f, 0.0f, 0.6f, 1.0f}; // color ambiental: morado
-    GLfloat mat_diffuse[]  = {0.0f, 0.0f, 0.0f, 1.0f}; // sin difusa
-    GLfloat mat_specular[] = {0.0f, 0.0f, 0.0f, 1.0f}; // sin especular
-
-    glMaterialfv(GL_FRONT, GL_AMBIENT,   mat_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE,   mat_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR,  mat_specular);
-    glMaterialf (GL_FRONT, GL_SHININESS, 0.0);
-
-    glPushMatrix();
-    glTranslatef(-3.5, 0, 0);        // posicionar a la izquierda
-    glutSolidSphere(1.0, 32, 32);
-    glPopMatrix();
-}
-
-/**
-OBJETO 2 — AMBIENTAL + DIFUSA
-Ahora el objeto tiene volumen: las caras orientadas hacia
-la luz se iluminan más, las opuestas quedan en sombra.
-La componente difusa es la más importante para dar forma.
-**/
-void dibujar_difusa(){
-    GLfloat mat_ambient[]  = {0.1f, 0.3f, 0.1f, 1.0f}; // ambiental verde oscuro
-    GLfloat mat_diffuse[]  = {0.2f, 0.9f, 0.2f, 1.0f}; // difusa verde brillante
-    GLfloat mat_specular[] = {0.0f, 0.0f, 0.0f, 1.0f}; // sin especular
-
-    glMaterialfv(GL_FRONT, GL_AMBIENT,   mat_ambient);  // ambiental verde oscuro
-    glMaterialfv(GL_FRONT, GL_DIFFUSE,   mat_diffuse);  // difusa verde brillante
-    glMaterialfv(GL_FRONT, GL_SPECULAR,  mat_specular);  // sin especular
-    glMaterialf (GL_FRONT, GL_SHININESS, 0.0);
-
-    glPushMatrix();
-    glTranslatef(0, -0.5, 0);        // centrado, bajado un poco por la tetera
-    glutSolidTeapot(1.0);
-    glPopMatrix();
-}
-
-/**
-OBJETO 3 — AMBIENTAL + DIFUSA + ESPECULAR
-El reflejo especular agrega un punto brillante (highlight)
-que se mueve según el ángulo entre la luz y la cámara.
-GL_SHININESS controla el tamaño del reflejo:
-valor bajo  (1-10)  -> reflejo grande y difuso (material mate)
-valor alto (64-128) -> reflejo pequeño y concentrado (material brillante)
-**/
-void dibujar_especular(){
-    GLfloat mat_ambient[]  = {0.1f, 0.1f, 0.3f, 1.0f}; // ambiental azul oscuro
-    GLfloat mat_diffuse[]  = {0.2f, 0.2f, 0.8f, 1.0f}; // difusa azul
-    GLfloat mat_specular[] = {1.0f, 1.0f, 1.0f, 1.0f}; //reflejo blanco puro
-
-    glMaterialfv(GL_FRONT, GL_AMBIENT,   mat_ambient);   // ambiental azul oscuro
-    glMaterialfv(GL_FRONT, GL_DIFFUSE,   mat_diffuse);   // difusa azul
-    glMaterialfv(GL_FRONT, GL_SPECULAR,  mat_specular);  // reflejo blanco puro
-    glMaterialf (GL_FRONT, GL_SHININESS, 96.0);                  // muy concentrado (tipo metal)
-
-    glPushMatrix();
-    glTranslatef(3.5, 0, 0);         // posicionar a la derecha
-    glutSolidSphere(1.0, 32, 32);
-    glPopMatrix();
 }
 
 void display(void)
